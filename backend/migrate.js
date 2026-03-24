@@ -40,7 +40,7 @@ async function runMigration() {
     console.log("   -meal_plans");
     console.log("   -shopping_list_items");
   } catch (error) {
-    console.log("Migration failed:", error.messsage);
+    console.error("Migration failed:", error.message);
     process.exit(1);
   } finally {
     client.release();
