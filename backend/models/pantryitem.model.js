@@ -63,4 +63,37 @@ class PantryItem {
     );
     return result.rows[0];
   }
+
+  //update pantry item
+  static async update(id, userId, updates) {
+    const { name, quantity, unit, category, expiry_date, is_running_low } =
+      updates;
+
+    const result = await db.query(
+      `UPDATE pantry_items SET name = COALESCE($1, name),quanity = COALESCE($2, quantity), unit = COALESCE($3, unit), category = COALESCE($4, category), expiry_date = COALESCE($5, expiry_date), is_running_low = COALESCE($6, is_running_low) WHERE id=$7 AND user_id = $8 RETURNING *`,
+      [name, quantity, unit, category, expiry_date, is_running_low, id, userId],
+    );
+    return result.rows[0];
+  }
+
+  //delete pantry item
+  static async delete(id, userId) {
+    const result = await db.query(
+      `DELETE FROM pantry_items WHERE id = $1 AND user_id = $2 RETURNING *`,
+      [id, userId],
+    );
+    return result.rows[0];
+  }
+
+  //get pantry stats
+  static async getStats(userId) {
+    const result = await db.query(
+      `SELECT COUNT(*) as total_items, COUNT(DISTINCT category) as total_categories, COUNT(*) FILTER (WHERE is_running_low = true) as running_low_count,
+      COUNT(*) FILTER (WHERE expiry_date <= CURRENT_DATE + INTERVAL '7 days' AND expiry_date >= CURRENT_DATE ) as expiring_soon_count FROM pantry_items WHERE user_id = $1`,
+      [userId],
+    );
+    return result.rows[0];
+  }
 }
+
+export default PantryItem;
