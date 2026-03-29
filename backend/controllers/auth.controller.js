@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
-import UserPreference from "../models/userPreferences.model";
+import UserPreference from "../models/userPreferences.model.js";
 
 //GENERATE JWT TOKEN
 
