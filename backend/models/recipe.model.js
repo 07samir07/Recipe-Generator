@@ -229,4 +229,23 @@ class Recipe {
     );
     return result.rows[0];
   }
+
+  //delete a recipe
+  static async delete(id, userId) {
+    const result = await db.query(
+      `DELETE FROM recipes WHERE id = $1 AND user_id = $2 RETURNING *`,
+      [id, userId],
+    );
+    return result.rows[0];
+  }
+
+  //get recipe stats
+  static async getStats(userId) {
+    const result = await db.query(
+      `SELECT COUNT(*) as total_recipes, COUNT(DISTINCT cuisine_type) as cuisine_type_count,AVG(cook_time)as abg_cook_time FROM recipes WHERE user_id = $1`,
+      [userId],
+    );
+    return result.rows[0];
+  }
 }
+export default Recipe;
