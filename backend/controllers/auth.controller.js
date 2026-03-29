@@ -68,3 +68,56 @@ export const register = async (req, res, next) => {
     next(error);
   }
 };
+
+/*LOGIN FUNCTION*/
+export const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    //Validation
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide email and password",
+      });
+    }
+    //finding the user
+    const user = await User.findByEmail(email);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    //verify password
+    const isPasswordValid = await User.verifyPassword(
+      password,
+      user.password_hash,
+    );
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+
+    //generate token
+    const token = generateToken(user);
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      data: {
+        user: {
+          id: user._id,
+          email: user.email,
+          name: user.name,
+        },
+        token,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
