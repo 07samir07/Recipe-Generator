@@ -50,7 +50,7 @@ export const register = async (req, res, next) => {
     });
 
     //GENERATE TOKEN
-    const token = generateToken(User);
+    const token = generateToken(user);
 
     res.status(201).json({
       success: true,
@@ -116,6 +116,51 @@ export const login = async (req, res, next) => {
         },
         token,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//Get current user
+
+export const getCurrentUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    res.json({
+      success: true,
+      data: { user },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//password reset (would send email in production, here we just return success message)
+
+export const requestPasswordReset = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide email",
+      });
+    }
+
+    const user = await User.findByEmail(email);
+
+    //dont reveal if user exists or not
+    res.json({
+      success: true,
+      message:
+        "If an account exists with this email, a password reset link has been sent",
     });
   } catch (error) {
     next(error);
