@@ -88,4 +88,33 @@ class Recipe {
       client.release();
     }
   }
+
+  //get recipe by ID with ingredients and nutriition
+  static async findById(id, userId) {
+    const recipeResult = await db.query(
+      `SELECT * FROM recipes WHERE id = $1 AND user_id= $2`[(id, userId)],
+    );
+    if (recipeResult.rows.length === 0) {
+      return null;
+    }
+
+    const recipe = recipeResult.rows[0];
+
+    //get ingredients
+    const ingredientResult = await db.query(
+      `SELECT ingredient_name as name, quantity, unit FROM recipe_ingredients WHERE recipe_id = $1`,
+      [id],
+    );
+
+    //get nutrition
+    const nutritionResult = await db.query(
+      `SELECT calories, protein, carbs, fats, fiber FROM recipe_nutrition WHERE recipe_id = $1`,
+      [id],
+    );
+    return {
+      ...recipe,
+      ingredients: ingredientResult.rows,
+      nutrition: nutritionResult.rows[0] || null,
+    };
+  }
 }
