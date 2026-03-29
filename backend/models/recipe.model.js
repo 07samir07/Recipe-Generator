@@ -92,7 +92,8 @@ class Recipe {
   //get recipe by ID with ingredients and nutriition
   static async findById(id, userId) {
     const recipeResult = await db.query(
-      `SELECT * FROM recipes WHERE id = $1 AND user_id= $2`[(id, userId)],
+      `SELECT * FROM recipes WHERE id = $1 AND user_id = $2`,
+      [id, userId],
     );
     if (recipeResult.rows.length === 0) {
       return null;
