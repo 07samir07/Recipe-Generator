@@ -94,6 +94,44 @@ class ShoppingList {
     );
     return result.rows;
   }
+
+  //update shopping list item
+  static async update(id, userId, updates) {
+    const { ingredient_name, quantity, unit, category, is_checked } = updates;
+
+    const result = await db.query(
+      `UPDATE shopping_list_items SET ingredient_name = COALESCE($1,ingredient_name), quantity = COALESCE($2,quantity), unit= COALESCE($3,unit),category = COALESCE($4, category), is_checked = COALESCE($5,is_checked) WHERE id = $6 AND user_id = $7 RETURNING *`,
+      [ingredient_name, quantity, unit, category, is_checked, id, userId],
+    );
+    return result.rows[0];
+  }
+  //TOGGLE ITEM CHECKED STATUS
+  static async toggleChecked(id, userId) {
+    const result = await db.query(
+      `UPDATE shopping_list_items SET is_checked = NOT is_checked WHERE id = $1 AND user_id = $2 RETURNING *`[
+        (id, userId)
+      ],
+    );
+    return result.rows[0];
+  }
+
+  //DELETE SHOPPING LIST ITEMS
+  static async delete(id, userId) {
+    const result = await db.query(
+      `DELETE FROM shopping_list_items WHERE id = $1 AND user_id = $2 RETURNING*`,
+      [id, userId],
+    );
+    return result.rows[0];
+  }
+  //CLEAR ALL CHECKED ITEMS
+  static async clearChecked(userId) {
+    const result = await db.query(
+      `DELETE FROM shopping_list_items WHERE user_id = $1 AND is_checked = true REMAINING *`[
+        userId
+      ],
+    );
+    return result.rows;
+  }
 }
 
 export default ShoppingList;
