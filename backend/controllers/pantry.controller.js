@@ -80,3 +80,24 @@ export const updatePantryItem = async (req, res, next) => {
     next(error);
   }
 };
+
+//delete pantry item
+export const deletePantryItem = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const item = await PantryItem.delete(id, req.user.id);
+    if (!item) {
+      return res.status(404).json({
+        success: false,
+        message: "Pantry item not found",
+      });
+    }
+    res.json({
+      success: true,
+      message: "Pantry item deleted",
+      data: { item },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
