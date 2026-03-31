@@ -126,11 +126,59 @@ class ShoppingList {
   //CLEAR ALL CHECKED ITEMS
   static async clearChecked(userId) {
     const result = await db.query(
-      `DELETE FROM shopping_list_items WHERE user_id = $1 AND is_checked = true REMAINING *`[
-        userId
-      ],
+      `DELETE FROM shopping_list_items WHERE user_id = $1 AND is_checked = true REMAINING *`,
+      [userId],
     );
     return result.rows;
+  }
+
+  //CLEAR ENTIRE SHOPPING LIST
+  static async clearAll(userId) {
+    const result = await db.query(
+      `DELETE FROM shopping_list_items WHERE user_id = $1 RETURNING *`,
+      [userId],
+    );
+    return result.rows;
+  }
+  //ADD CHECKED ITEMS DIRECTLY TO PANTRY
+  static async addCheckedToPantry(userId) {
+    const client = await db.pool.connect();
+
+    try {
+      await client.query("BEGIN");
+      //get checked items
+      const checkedItems = await client.query(
+        `SELECT * FROM shopping_list_items WHERE user_id = $1 AND is_checked = true`,
+        [userId],
+      );
+      //add to pantry
+      for (const item of checkedItems.rows) {
+        await client.query(
+          `INSERT INTO pantry_items(user_id, name, quantity, unit, category) VALUES($1,$2,$3,$4,$5)`,
+          [
+            userId,
+            item.ingredient_name,
+            item.quantity,
+            item.unit,
+            item.category,
+          ],
+        );
+      }
+
+      //DLEETE CHECKED ITEMS FROM SHOPPING LIST
+      await client.query(
+        `DELETE FROM shopping_list_items WHERE user_id = $1 AND is_checked = true`,
+        [userId],
+      );
+      await client.query("COMMIT");
+
+      return checkedItems.rows;
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 }
 
