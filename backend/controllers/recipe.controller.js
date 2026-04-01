@@ -163,6 +163,41 @@ export const udpateRecipe = async (req, res, next) => {
     res.json({
       success: true,
       message: "Recipe updated successfully",
+      data: { recipe },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//delete recipe
+export const deleteRecipe = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const recipe = await Recipe.delete(id, req.user.id);
+    if (!recipe) {
+      return res.status(404).json({
+        success: false,
+        message: "Recipe not found",
+      });
+    }
+    res.json({
+      success: true,
+      message: "Recipe deleted successfully",
+      data: { recipe },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//get recipe stats
+export const getRecipeStats = async (req, res, next) => {
+  try {
+    const stats = await Recipe.getStats(req.user.id);
+    res.json({
+      success: true,
+      data: { stats },
     });
   } catch (error) {
     next(error);
