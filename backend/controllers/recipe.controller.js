@@ -114,3 +114,57 @@ export const getRecipes = async (req, res, next) => {
     next(error);
   }
 };
+
+//get recent recipes
+export const getRecentRecipes = async (req, res, next) => {
+  try {
+    const limit = parseInt(req.query.limit) || 5;
+    const recipes = await Recipe.getRecent(req.user.id, limit);
+    res.json({
+      success: true,
+      data: { recipes },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//get recipe by ID
+export const getRecipeById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const recipe = await Recipe.findById(id, req.user.id);
+    if (!recipe) {
+      return res.status(404).json({
+        success: false,
+        message: "Recipe not found",
+      });
+    }
+    res.json({
+      success: true,
+      data: { recipe },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//update recipes
+export const udpateRecipe = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const recipe = await Recipe.update(id, req.user.id, req.body);
+    if (!recipe) {
+      return res.status(404).json({
+        success: false,
+        message: "Recipe not found",
+      });
+    }
+    res.json({
+      success: true,
+      message: "Recipe updated successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
