@@ -1,6 +1,11 @@
 import PantryItem from "../models/pantryitem.model.js";
 import Recipe from "../models/recipe.model.js";
+import {
+  generateRecipe as generateRecipeAI,
+  generatePantrySuggestions as generatePantrySuggestionsAI,
+} from "../utils/gemini.js";
 
+//generate recipe using ai
 export const generateRecipe = async (req, res, next) => {
   try {
     const {
